@@ -11,21 +11,21 @@ jobs:
       - name: دریافت کد از مخزن
         uses: actions/checkout@v4
 
-      - name: نمایش ساختار کامل پوشه‌ها
+      - name: نمایش ساختار پوشه‌ها (عیب‌یابی)
         run: |
-          echo "=== پوشه فعلی ==="
+          echo "=== مسیر فعلی ==="
           pwd
           echo "=== لیست فایل‌ها و پوشه‌ها ==="
           ls -la
-          echo "=== جستجوی فایل pubspec.yaml ==="
+          echo "=== جستجوی pubspec.yaml ==="
           find . -name "pubspec.yaml" -type f
-          echo "=== بررسی محتوای پوشه cabinet_app (اگر وجود دارد) ==="
+          echo "=== محتوای پوشه cabinet_app (اگر وجود دارد) ==="
           if [ -d "cabinet_app" ]; then
+            echo "پوشه cabinet_app وجود دارد:"
             ls -la cabinet_app
           else
             echo "پوشه cabinet_app وجود ندارد"
           fi
-          echo "=== پایان عیب‌یابی ==="
 
       - name: نصب Java
         uses: actions/setup-java@v3
@@ -39,13 +39,35 @@ jobs:
           channel: 'stable'
 
       - name: دریافت وابستگی‌های پروژه
-        run: flutter pub get
+        run: |
+          if [ -f "pubspec.yaml" ]; then
+            echo "pubspec.yaml در ریشه پیدا شد"
+            flutter pub get
+          elif [ -f "cabinet_app/pubspec.yaml" ]; then
+            echo "pubspec.yaml در پوشه cabinet_app پیدا شد"
+            cd cabinet_app && flutter pub get
+          else
+            echo "خطا: pubspec.yaml پیدا نشد!"
+            echo "لیست کامل فایل‌ها:"
+            find . -type f -name "*.yaml"
+            exit 1
+          fi
 
       - name: ساخت فایل APK نهایی
-        run: flutter build apk --release
+        run: |
+          if [ -f "pubspec.yaml" ]; then
+            flutter build apk --release
+          elif [ -f "cabinet_app/pubspec.yaml" ]; then
+            cd cabinet_app && flutter build apk --release
+          else
+            exit 1
+          fi
 
       - name: آپلود فایل APK ساخته شده
         uses: actions/upload-artifact@v4
         with:
           name: android-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: |
+            build/app/outputs/flutter-apk/app-release.apk
+            cabinet_app/build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: ignore
