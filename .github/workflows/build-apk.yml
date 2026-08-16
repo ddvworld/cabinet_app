@@ -24,12 +24,14 @@ jobs:
 
       - name: دریافت وابستگی‌های پروژه
         run: flutter pub get
+        working-directory: ./cabinet_app  # <--- این خط را اضافه کنید
 
       - name: ساخت فایل APK نهایی
         run: flutter build apk --release
+        working-directory: ./cabinet_app  # <--- این خط را اضافه کنید
 
       - name: آپلود فایل APK ساخته شده
         uses: actions/upload-artifact@v4
         with:
           name: android-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: cabinet_app/build/app/outputs/flutter-apk/app-release.apk  # <--- مسیر را اصلاح کنید
