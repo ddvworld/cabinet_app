@@ -11,6 +11,13 @@ jobs:
       - name: دریافت کد از مخزن
         uses: actions/checkout@v4
 
+      - name: نمایش ساختار پوشه (برای عیب‌یابی)
+        run: |
+          echo "محتوای پوشه فعلی:"
+          ls -la
+          echo "محتوای پوشه cabinet_app (اگر وجود دارد):"
+          ls -la cabinet_app || echo "پوشه cabinet_app وجود ندارد"
+
       - name: نصب Java
         uses: actions/setup-java@v3
         with:
@@ -24,14 +31,14 @@ jobs:
 
       - name: دریافت وابستگی‌های پروژه
         run: flutter pub get
-        working-directory: ./cabinet_app  # <--- این خط را اضافه کنید
+        # working-directory را حذف کنید یا اصلاح کنید
 
       - name: ساخت فایل APK نهایی
         run: flutter build apk --release
-        working-directory: ./cabinet_app  # <--- این خط را اضافه کنید
+        # working-directory را حذف کنید یا اصلاح کنید
 
       - name: آپلود فایل APK ساخته شده
         uses: actions/upload-artifact@v4
         with:
           name: android-apk
-          path: cabinet_app/build/app/outputs/flutter-apk/app-release.apk  # <--- مسیر را اصلاح کنید
+          path: build/app/outputs/flutter-apk/app-release.apk
